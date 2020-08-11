@@ -1,0 +1,6 @@
+<library path="lib/libarm_effort_controller">
+  <class name = "arm_controller/ArmEffortControllerPlugin"
+  type="arm_controller_ns::ArmEffortController" base_class_type="controller_interface::ControllerBase">
+  </class>
+</library>
+

@@ -1,0 +1,6 @@
+<launch>
+   <rosparam file="$(find arm_controller)/arm_effort_controller.yaml" command="load" />
+
+<!-- Start controllers -->
+  <node name="arm_effort_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="arm_effort_controller_obj" />
+</launch>

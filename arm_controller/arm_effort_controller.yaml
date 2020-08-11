@@ -1,0 +1,3 @@
+arm_effort_controller_obj:
+ type: arm_controller/ArmEffortControllerPlugin
+ joint_name: joint1
