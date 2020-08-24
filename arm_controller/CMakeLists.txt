@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(arm_controller)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,7 +11,9 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   controller_interface
   hardware_interface
-  pluginlib 
+  pluginlib
+  kdl_parser
+  orocos_kdl
 )
 
 ## System dependencies are found with CMake's conventions
@@ -106,8 +108,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES arm_effort_controller
-  CATKIN_DEPENDS controller_interface hardware_interface pluginlib roscpp
-  DEPENDS system_lib
+  CATKIN_DEPENDS controller_interface hardware_interface pluginlib roscpp kdl_parser
+  DEPENDS orocos_kdl
 )
 
 ###########
@@ -119,6 +121,7 @@ catkin_package(
 include_directories(
  include
   ${catkin_INCLUDE_DIRS}
+  ${orocos_kdl_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -129,7 +132,7 @@ include_directories(
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-add_dependencies(arm_effort_controller ${catkin_EXPORTED_TARGETS})
+add_dependencies(arm_effort_controller ${catkin_EXPORTED_TARGETS} ${orocos_kdl_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
@@ -147,9 +150,7 @@ add_dependencies(arm_effort_controller ${catkin_EXPORTED_TARGETS})
 ##add_dependencies(arm_effort_controller ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(arm_effort_controller
-   ${catkin_LIBRARIES}
- )
+ target_link_libraries(arm_effort_controller ${catkin_LIBRARIES} ${orocos_kdl_LIBRARIES})
 
 #############
 ## Install ##
