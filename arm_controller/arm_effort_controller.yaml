@@ -1,3 +1,12 @@
 arm_effort_controller_obj:
  type: arm_controller/ArmEffortControllerPlugin
- joint_name: joint1
+ joints:
+  - joint_0
+  - joint_1
+  - joint_2
+  - joint_3
+  - joint_4
+  - joint_5
+  - joint_6
+ urdf_model:
+  /home/lucaslima/catkin_test_ws/src/robot_kdl/kuka_urdf/kuka_urdf_test.urdf
