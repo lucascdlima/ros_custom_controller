@@ -1,0 +1,9 @@
+<launch>
+   <!-- Load the urdf into the parameter server. -->
+   <param name="arm_kuka_description" textfile="/home/lucaslima/catkin_test_ws/src/robot_kdl/kuka_urdf/kuka_urdf_test.urdf"/>
+
+   <node pkg="robot_state_publisher" type="robot_state_publisher" name="kuka_st_pub" >
+      <remap from="robot_description" to="arm_kuka_description" />
+      <remap from="joint_states" to="arm_joints_states" />
+    </node>
+</launch>
