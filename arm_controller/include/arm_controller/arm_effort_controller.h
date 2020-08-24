@@ -4,6 +4,12 @@
 #include <pluginlib/class_list_macros.h>
 #include <controller_interface/controller.h>
 #include <hardware_interface/joint_command_interface.h>
+#include <kdl/chain.hpp>
+#include <kdl/chaindynparam.hpp>
+#include <kdl/frames_io.hpp>
+#include <kdl_parser/kdl_parser.hpp>
+#include <ros/console.h>
+#include <Eigen/LU>
 
 
 namespace arm_controller_ns{
@@ -12,16 +18,42 @@ class ArmEffortController: public controller_interface::Controller<hardware_inte
 {
 
 private:
-  //pr2_mechanism_model::RobotState *robot_;
-  //pr2_mechanism_model::JointState* joint_state_;
-  //pr2_mechanism_model::JointState* joint_states_array[7];
+
+  KDL::Chain robot_chain;
+  KDL::Tree robot_tree;
+  std::string urdf_model_;
 
   double init_pos_;
-  ros::NodeHandle node_;
-  ros::Subscriber sub_command_;
-  ros::Publisher pub_joint_states_;
+  ros::NodeHandle nh_;
+
   std::vector<std::string> joint_names_;
-  //void commandCB();//const std_msgs::Float64MultiArrayConstPtr& msg);
+
+  unsigned int num_jnts_;
+  std::vector<hardware_interface::JointHandle> joints_;
+
+  KDL::JntArray jnts_vel;
+  KDL::JntArray jnts_pos;
+  KDL::JntArray jnts_acc;
+  KDL::JntArray jnts_effort_command;
+
+  KDL::ChainDynParam* chain_dynamics;
+  KDL::JntSpaceInertiaMatrix M_inertia;
+  KDL::JntArray C_coriolis;
+  KDL::JntArray G_gravity;
+
+  double pi;
+  double wn;
+
+  KDL::JntArray jnt_u;
+
+  Eigen::Matrix<double,7,7> Kp;
+  Eigen::Matrix<double,7,7> Kd;
+
+  Eigen:: Matrix<double,7,1> q_des;
+  Eigen:: Matrix<double,7,1> dq_des;
+  Eigen:: Matrix<double,7,1> ddq_des;
+
+  ros::Time start_time;
 
 public:
   ArmEffortController();
