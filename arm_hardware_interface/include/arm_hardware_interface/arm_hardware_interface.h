@@ -4,16 +4,24 @@
 #include <hardware_interface/joint_command_interface.h>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/robot_hw.h>
+#include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64MultiArray.h>
 
+struct MyJointState{
+  double position;
+  double velocity;
+  double effort;
+  std::string name;
+};
 
 class ManipulatorRobot : public hardware_interface::RobotHW
 {
 public:
   ManipulatorRobot(ros::NodeHandle& nh);
-  void init();
-  //void update(const ros::TimerEvent& e);
+  bool init();
   void read(const ros::Time &etime, const ros::Duration &duration);
-  void write(const ros::Time &etime, const ros::Duration &duration);
+  void write(const ros::Time &etime, const ros::Duration &duration, ros::Publisher &pub);
+  void SubJointsStates(const sensor_msgs::JointStateConstPtr& msg);
 
 private:
   ros::NodeHandle nh_;
@@ -21,20 +29,15 @@ private:
   ros::Duration control_period_;
   ros::Duration elapsed_time_;
   hardware_interface::PositionJointInterface jnt_pos_interface_;
-  //hardware_interface::PositionJointSoftLimitsInterface positionJointSoftLimitsInterface;
+
   double loop_hz_;
-  //boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
-  //double p_error_, v_error_, e_error_;
+
   hardware_interface::JointStateInterface jnt_state_interface_;
 
   hardware_interface::EffortJointInterface jnt_effort_interface_;
-  //boost::shared_ptr<controller_manager::ControllerManager> controller_manager_;
 
-  //hardware_interface::PositionJointInterface jnt_pos_interface;
-
-  // Shared memory
   unsigned int num_jnts_;
-  int control_mode_; // position, velocity, or effort
+  int control_mode_;
   std::vector<std::string> joint_names_;
   std::vector<int> joint_types_;
   std::vector<double> joint_position_;
@@ -43,10 +46,8 @@ private:
   std::vector<double> joint_position_command_;
   std::vector<double> joint_velocity_command_;
   std::vector<double> joint_effort_command_;
-  /*std::vector<double> joint_lower_limits_;
-  std::vector<double> joint_upper_limits_;
-  std::vector<double> joint_effort_limits_;*/
 
+  std::vector<MyJointState> joints_states;
 
 };
 
