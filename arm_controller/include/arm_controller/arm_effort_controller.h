@@ -19,9 +19,9 @@ class ArmEffortController: public controller_interface::Controller<hardware_inte
 
 private:
 
-  KDL::Chain robot_chain;
-  KDL::Tree robot_tree;
-  std::string urdf_model_;
+  KDL::Chain robot_chain; //handle a chain of joint-link segments
+  KDL::Tree robot_tree; //handle a group of chains
+  std::string urdf_model_; //path to urdf manipulator model file
 
   double init_pos_;
   ros::NodeHandle nh_;
@@ -31,35 +31,34 @@ private:
   unsigned int num_jnts_;
   std::vector<hardware_interface::JointHandle> joints_;
 
+  //attributes to handle joints positions, velocities, accelerations and effort commands
   KDL::JntArray jnts_vel;
   KDL::JntArray jnts_pos;
   KDL::JntArray jnts_acc;
   KDL::JntArray jnts_effort_command;
 
-  KDL::ChainDynParam* chain_dynamics;
-  KDL::JntSpaceInertiaMatrix M_inertia;
-  KDL::JntArray C_coriolis;
-  KDL::JntArray G_gravity;
-
-  double pi;
-  double wn;
+  KDL::ChainDynParam* chain_dynamics;  //attribute to compute dynamic parameters of a manipulator
+  KDL::JntSpaceInertiaMatrix M_inertia; //Lagrange inertia matrix
+  KDL::JntArray C_coriolis; //Lagrange Coriolis vector
+  KDL::JntArray G_gravity; //Lagrange Gravity vector
 
   KDL::JntArray jnt_u;
 
-  Eigen::Matrix<double,7,7> Kp;
-  Eigen::Matrix<double,7,7> Kd;
+  Eigen::MatrixXd Kp; //Proportional constants of control
+  Eigen::MatrixXd Kd; //Derivative constants of control
 
-  Eigen:: Matrix<double,7,1> q_des;
-  Eigen:: Matrix<double,7,1> dq_des;
-  Eigen:: Matrix<double,7,1> ddq_des;
+  double wn; //angular frequency of desired joints trajectory (sinusoid)
+
+  Eigen:: VectorXd q_des; //joints desired position
+  Eigen:: VectorXd dq_des; //joints desired velocities
+  Eigen:: VectorXd ddq_des; //joints desired acceleration
 
   ros::Time start_time;
 
 public:
   ArmEffortController();
   ~ArmEffortController();
-  //double command_;
-  //double command_array[7];
+
   bool init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n);
   void starting(const ros::Time& time);
   void update(const ros::Time& time, const ros::Duration& period);
