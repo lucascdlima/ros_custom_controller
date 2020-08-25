@@ -1,6 +1,9 @@
 <launch>
-   <rosparam file="$(find arm_controller)/arm_effort_controller.yaml" command="load" />
+  <rosparam file="$(find arm_hardware_interface)/arm_hardware_interface.yaml" command="load" />
+  <rosparam file="$(find arm_controller)/arm_effort_controller.yaml" command="load" />
 
+<!-- Start hardware interface node -->
+  <node name="arm_hardware_interface_node" pkg="arm_hardware_interface" type="arm_hardware_interface_node" output="screen" />
 <!-- Start controllers -->
   <node name="arm_effort_controller_spawner" pkg="controller_manager" type="spawner" output="screen" args="arm_effort_controller_obj" />
 </launch>
