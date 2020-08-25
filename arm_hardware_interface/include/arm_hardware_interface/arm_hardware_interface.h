@@ -25,19 +25,11 @@ public:
 
 private:
   ros::NodeHandle nh_;
-  ros::Timer non_realtime_loop_;
-  ros::Duration control_period_;
-  ros::Duration elapsed_time_;
-  hardware_interface::PositionJointInterface jnt_pos_interface_;
-
-  double loop_hz_;
-
-  hardware_interface::JointStateInterface jnt_state_interface_;
 
   hardware_interface::EffortJointInterface jnt_effort_interface_;
 
   unsigned int num_jnts_;
-  int control_mode_;
+
   std::vector<std::string> joint_names_;
   std::vector<int> joint_types_;
   std::vector<double> joint_position_;

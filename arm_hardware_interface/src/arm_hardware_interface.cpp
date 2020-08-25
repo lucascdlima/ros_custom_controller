@@ -28,15 +28,15 @@ bool ManipulatorRobot::init()
 
   for (unsigned int i = 0; i < num_jnts_; ++i)
   {
-    // Creates joint state handle
+    // Creates joint state handle and provide refecente to joints states and command vectors
     hardware_interface::JointStateHandle jointStateHandle(joint_names_[i], &joint_position_[i], &joint_velocity_[i], &joint_effort_[i]);
 
-    // Creates joint handle and registers it in a EffortJointInterface
+    // Creates joint handle, passes effort command vector reference and registers it in a EffortJointInterface
     hardware_interface::JointHandle jointEffortHandle(jointStateHandle, &joint_effort_command_[i]);
     jnt_effort_interface_.registerHandle(jointEffortHandle);
   }
 
-  //Registers the EffortJointInterface in the interface manager
+  //Registers the EffortJointInterface in the ros interface manager
   registerInterface(&jnt_effort_interface_);
 
   ROS_INFO("hardware interface initiated");
@@ -48,6 +48,7 @@ bool ManipulatorRobot::init()
 void ManipulatorRobot::read(const ros::Time &etime, const ros::Duration &duration)
 {
 
+  //Pass joints data from joints handles (ros hardware interface) to internal joints states vectors
   for (uint i = 0; i < num_jnts_; i++) {
     joint_position_[i] = joints_states[i].position;
     joint_velocity_[i] = joints_states[i].velocity;
@@ -62,6 +63,7 @@ void ManipulatorRobot::write(const ros::Time &etime, const ros::Duration &durati
   std_msgs::Float64MultiArray msg;
   msg.data.resize(num_jnts_);
 
+  //Sets ros msg to publish effort commands received from joint handle (ros hardware interface)
   for (uint i = 0; i < num_jnts_; i++)
   {
     msg.data[i] = joint_effort_command_[i];
@@ -73,6 +75,7 @@ void ManipulatorRobot::write(const ros::Time &etime, const ros::Duration &durati
 
 void ManipulatorRobot::SubJointsStates(const sensor_msgs::JointStateConstPtr& msg)
 {
+  //Get joints states received from simulated hardware through ROS topic
   for(uint i=0; i<num_jnts_; i++)
   {
     joints_states[i].effort = msg->effort[i];
