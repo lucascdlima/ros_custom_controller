@@ -12,7 +12,7 @@ RobotKDL::RobotKDL()
 
 RobotKDL::RobotKDL(const char* urdf_file, ros::NodeHandle &n)
 {
-
+  //Tries to parse robot urdf model to KDL::chain class
   if (!kdl_parser::treeFromFile(urdf_file, robot_tree))
   {
     ROS_ERROR("Failed to construct kdl tree");
@@ -25,21 +25,7 @@ RobotKDL::RobotKDL(const char* urdf_file, ros::NodeHandle &n)
 
     KDL::SegmentMap robot_segment_map = robot_tree.getSegments();
 
-    KDL::SegmentMap::iterator itr;
-
-
-    for (itr = ++robot_segment_map.begin(); itr != robot_segment_map.end() ; ++itr)
-    {
-      cout <<"segment name = " << itr->second.segment.getName()<<endl;
-      cout<<"joint type = "<<itr->second.segment.getJoint().getTypeName()<<endl;
-      cout<<"Inertia matrix"<<Map<Matrix<double,3,3,RowMajor> >(itr->second.segment.getInertia().getRotationalInertia().data)<<endl;
-    }
-
-    string root_segment = robot_segment_map.begin()->second.segment.getName();
-    string tip_segment = (--robot_segment_map.end())->second.segment.getName();//itr2->second.segment.getName();
-    cout <<"root segment = " << root_segment<<endl;
-    cout<<"tip segment = "<<tip_segment<<endl;
-
+    //Tries to get a chain from specified link segments (base to end effector)
     if(!robot_tree.getChain("base_link","link_7", robot_chain))
     {
       cout<< "chain not acquired correctly!!"<<endl;
@@ -49,6 +35,7 @@ RobotKDL::RobotKDL(const char* urdf_file, ros::NodeHandle &n)
       std::vector<Segment> robot_segments = robot_chain.segments;
       jnts_names.resize(num_joints);
 
+      //Get movable joints names in the chain
       for(unsigned int i=1; i<robot_segments.size(); i++)
         jnts_names[i-1] = robot_segments[i].getJoint().getName();
 
@@ -74,48 +61,21 @@ RobotKDL::RobotKDL(const char* urdf_file, ros::NodeHandle &n)
   }
 
 
-
-
-  /*  chain.addSegment(Segment(Joint(Joint::RotZ),Frame(Vector(0.0,0.0,1.020))));
-  chain.addSegment(Segment(Joint(Joint::RotX),Frame(Vector(0.0,0.0,0.480))));
-  chain.addSegment(Segment(Joint(Joint::RotX),Frame(Vector(0.0,0.0,0.645))));
-  chain.addSegment(Segment(Joint(Joint::RotZ)));
-  chain.addSegment(Segment(Joint(Joint::RotX),Frame(Vector(0.0,0.0,0.120))));
-  chain.addSegment(Segment(Joint(Joint::RotZ)));*/
-
-
 }
 
 JntArray RobotKDL::UpdateDynamic()
 {
+  /* Function to update manipulator dynamics and return joints accelerations based on robot forward dynamics.
+     This function is used in simulation of robot dynamics.
+  */
 
-
-  /* for(unsigned int i=0;i<num_joints;i++)
-  {
-    jnts_effort_command.data(i) = 1.0;
-    jnts_pos.data(i) = 1.5;
-
-  }*/
-  /* vector<Segment> chain_segments = robot_chain.segments;
-  for (int i =0; i<num_joints; i++)
-  {
-    cout<<"Chain joint name "<<"["<<i<<"]"<<"="<<chain_segments[i].getName()<<endl;
-  }*/
-
+  //Gets manipulator dynamic parameters based on joints states
   chain_dynamics->JntToMass(jnts_pos,M_inertia);
-
   chain_dynamics->JntToCoriolis(jnts_pos,jnts_vel,C_coriolis);
-
   chain_dynamics->JntToGravity(jnts_pos,G_gravity);
 
+  //Compute joints accelerations using Lagrange dynamic model and forward dynamics
   jnts_acc.data = M_inertia.data.inverse()*(jnts_effort_command.data - C_coriolis.data - G_gravity.data);
-
-  /*
-  cout<<"M inertia = "<<endl;
-  cout<<M_inertia.data<<endl;
-  cout<<"C coriolis = "<<C_coriolis.data<<endl;
-  cout<<"G gravity = "<<G_gravity.data<<endl;
-  cout<<"Joints accelerations = "<<jnts_acc.data<<endl;*/
 
   return jnts_acc;
 
@@ -123,24 +83,17 @@ JntArray RobotKDL::UpdateDynamic()
 
 void RobotKDL::SetEffortCommand(const VectorXd& jnts_effort)
 {
-  /*Map<Matrix<double,7,1>>effort_temp(effort_jnts);
-  jnts_effort_command.data = effort_temp.derived();*/
   jnts_effort_command.data = jnts_effort;
 }
 
 void RobotKDL::SetJointsPosition(const VectorXd& jnts_position)
 {
-  /*Map<Matrix<double,7,1>>jnt_pos_temp(jnts_position);
-  jnts_pos.data = jnt_pos_temp.derived();*/
   jnts_pos.data = jnts_position;
 }
 
 void RobotKDL::SetJointsVelocity(const VectorXd& jnts_velocity)
 {
-  /* Map<Matrix<double,7,1>>jnt_vel_temp(jnts_velocity);
-  jnts_vel.data = jnt_vel_temp.derived();*/
   jnts_vel.data = jnts_velocity;
-
 }
 
 JntArray RobotKDL::GetJointsVelocity()
@@ -160,6 +113,9 @@ RobotKDL::~RobotKDL()
 
 void RobotKDL::SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg)
 {
+  /* Callback function to subscribe ros topic of commanded joints torques and set internal
+    effort joint command attribute. */
+
   VectorXd command;
   command.resize(num_joints);
 
@@ -172,6 +128,9 @@ void RobotKDL::SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg)
 
 void RobotKDL::SetJointStatesMsg(sensor_msgs::JointState &msg)
 {
+  /* Function to set a JointState msg with manipulator joints data updated
+     by internal simulation */
+
   msg.name.resize(num_joints);
   msg.effort.resize(num_joints);
   msg.position.resize(num_joints);
@@ -188,13 +147,50 @@ void RobotKDL::SetJointStatesMsg(sensor_msgs::JointState &msg)
 
 }
 
-int main(int argc, char* argv[])
+void RobotKDL::InitControlParam(ros::Time stime)
 {
+  /*Function to initiate parameters used in computation of manipulator dynamics. This function
+    is used only when internal control is performed. */
 
-  // RobotKDL myrobot("/home/lucaslima/catkin_test_ws/src/robot_kdl/kuka_urdf/kuka_urdf_test.urdf");
-  //myrobot.UpdateDynamic();
+  wn = 2*EIGEN_PI/4;
+  jnt_u.resize(num_joints);
+  KDL::SetToZero(jnt_u);
 
-  return 0;
+  Kp.resize(num_joints,num_joints);
+  Kd.resize(num_joints,num_joints);
+  Kp = MatrixXd::Identity(num_joints, num_joints);
+  Kd = MatrixXd::Identity(num_joints, num_joints);
 
+  q_des.resize(num_joints);
+  dq_des.resize(num_joints);
+  ddq_des.resize(num_joints);
+
+  start_time = stime.now();
 }
 
+void RobotKDL::ComputedTorqueControlExample(ros::Time time)
+{
+  /* Calculates the computed torque control based on manipulator Forward Dynamics and sets
+     joints effort commands.
+  */
+
+  for(uint i=0;i<num_joints;i++)
+  {
+    //Caculates desired joints positions, velocities and accelarations evolutions based on ros time
+
+    q_des(i) = sin((time.toSec() - start_time.toSec())*wn);
+    dq_des(i) = wn*cos((time.toSec() - start_time.toSec())*wn);
+    ddq_des(i) = -wn*wn*sin((time.toSec() - start_time.toSec())*wn);
+  }
+
+  //Updates robot dynamics parameters
+  chain_dynamics->JntToMass(jnts_pos,M_inertia);
+  chain_dynamics->JntToCoriolis(jnts_pos,jnts_vel,C_coriolis);
+  chain_dynamics->JntToGravity(jnts_pos,G_gravity);
+
+  //Calculates computed torque control and sets joints command effort data
+  jnt_u.data = Kp*(q_des - jnts_pos.data) + Kd*(dq_des - jnts_vel.data);
+  jnts_effort_command.data = M_inertia.data*(ddq_des + jnt_u.data ) + C_coriolis.data + G_gravity.data;
+
+
+}
