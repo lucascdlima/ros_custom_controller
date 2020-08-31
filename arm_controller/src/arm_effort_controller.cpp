@@ -9,13 +9,11 @@ ArmEffortController::ArmEffortController()
 {
 
 }
-ArmEffortController::~ArmEffortController()
-{
-
-}
 
 bool ArmEffortController::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n)
 {
+
+  chain_dynamics = nullptr;
 
   if (!hw)
   {
@@ -136,6 +134,11 @@ void ArmEffortController::update(const ros::Time& time, const ros::Duration& per
 
 }
 
+ArmEffortController::~ArmEffortController()
+{
+  if(chain_dynamics!=nullptr)
+    delete chain_dynamics;
+}
 
 }
 

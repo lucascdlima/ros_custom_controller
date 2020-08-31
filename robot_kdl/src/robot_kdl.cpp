@@ -7,11 +7,14 @@ using namespace Eigen;
 
 RobotKDL::RobotKDL()
 {
-
+  if(chain_dynamics!=nullptr)
+    delete chain_dynamics;
 }
 
 RobotKDL::RobotKDL(const char* urdf_file, ros::NodeHandle &n)
 {
+
+  chain_dynamics = nullptr;
   //Tries to parse robot urdf model to KDL::chain class
   if (!kdl_parser::treeFromFile(urdf_file, robot_tree))
   {
