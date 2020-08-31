@@ -1,5 +1,5 @@
 # ros_custom_controller
-Repository of my custom controller created in ROS. This is a example of `ros_control` package utilization in which I implemented a Computed Torque Control approach to control a KUKA lwr arm robot.
+Repository of my custom controller created in ROS. By using the `ros_control` package, I implemented a Computed Torque Control approach to control a KUKA lwr arm robot.
 
 ## Example
 
