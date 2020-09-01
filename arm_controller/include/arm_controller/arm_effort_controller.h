@@ -31,16 +31,18 @@ private:
   unsigned int num_jnts_;
   std::vector<hardware_interface::JointHandle> joints_;
 
-  //attributes to handle joints positions, velocities, accelerations and effort commands
+  //Stores joints positions, velocities, accelerations and effort commands
   KDL::JntArray jnts_vel;
   KDL::JntArray jnts_pos;
   KDL::JntArray jnts_acc;
   KDL::JntArray jnts_effort_command;
 
   KDL::ChainDynParam* chain_dynamics;  //attribute to compute dynamic parameters of a manipulator
-  KDL::JntSpaceInertiaMatrix M_inertia; //Lagrange inertia matrix
-  KDL::JntArray C_coriolis; //Lagrange Coriolis vector
-  KDL::JntArray G_gravity; //Lagrange Gravity vector
+
+  //Lagrange dynamic model components
+  KDL::JntSpaceInertiaMatrix M_inertia;
+  KDL::JntArray C_coriolis;
+  KDL::JntArray G_gravity;
 
   KDL::JntArray jnt_u;
 

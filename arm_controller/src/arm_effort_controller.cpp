@@ -7,14 +7,11 @@ namespace arm_controller_ns{
 
 ArmEffortController::ArmEffortController()
 {
-
+  chain_dynamics = nullptr;
 }
 
 bool ArmEffortController::init(hardware_interface::EffortJointInterface* hw, ros::NodeHandle &n)
 {
-
-  chain_dynamics = nullptr;
-
   if (!hw)
   {
     ROS_ERROR("The given robot was NULL");
@@ -75,14 +72,14 @@ bool ArmEffortController::init(hardware_interface::EffortJointInterface* hw, ros
   C_coriolis.resize(num_jnts_);
   G_gravity.resize(num_jnts_);
 
-  wn = 2*EIGEN_PI/4;
+  wn = 2*EIGEN_PI/5;
   jnt_u.resize(num_jnts_);
   KDL::SetToZero(jnt_u);
 
   Kp.resize(num_jnts_,num_jnts_);
   Kd.resize(num_jnts_,num_jnts_);
-  Kp = MatrixXd::Identity(num_jnts_, num_jnts_);
-  Kd = MatrixXd::Identity(num_jnts_, num_jnts_);
+  Kp = 2*MatrixXd::Identity(num_jnts_, num_jnts_);
+  Kd = 3*MatrixXd::Identity(num_jnts_, num_jnts_);
 
   q_des.resize(num_jnts_);
   dq_des.resize(num_jnts_);

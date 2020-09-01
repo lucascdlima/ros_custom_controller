@@ -47,7 +47,6 @@ bool ManipulatorRobot::init()
 
 void ManipulatorRobot::read(const ros::Time &etime, const ros::Duration &duration)
 {
-
   //Pass joints data from joints handles (ros hardware interface) to internal joints states vectors
   for (uint i = 0; i < num_jnts_; i++) {
     joint_position_[i] = joints_states[i].position;
@@ -55,7 +54,6 @@ void ManipulatorRobot::read(const ros::Time &etime, const ros::Duration &duratio
     joint_effort_[i] = joints_states[i].effort;
   }
 
-  //ROS_INFO("read executed");
 }
 
 void ManipulatorRobot::write(const ros::Time &etime, const ros::Duration &duration, ros::Publisher &pub)
@@ -69,8 +67,6 @@ void ManipulatorRobot::write(const ros::Time &etime, const ros::Duration &durati
     msg.data[i] = joint_effort_command_[i];
   }
   pub.publish(msg);
-
-  //ROS_INFO("write executed");
 }
 
 void ManipulatorRobot::SubJointsStates(const sensor_msgs::JointStateConstPtr& msg)
