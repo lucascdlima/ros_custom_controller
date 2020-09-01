@@ -146,7 +146,7 @@ void RobotKDL::SetJointStatesMsg(sensor_msgs::JointState &msg)
 
 }
 
-void RobotKDL::InitControlParam(ros::Time stime)
+void RobotKDL::InitControlParam()
 {
   /*Function to initiate parameters used in computation of manipulator dynamics. This function
     is used only when internal control is performed. */

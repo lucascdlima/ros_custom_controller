@@ -60,7 +60,7 @@ class RobotKDL{
 
     //Methods and attributes below used in internal control only
     void ComputedTorqueControlExample();
-    void InitControlParam(ros::Time stime);
+    void InitControlParam();
 
     KDL::JntArray jnt_u;
 
