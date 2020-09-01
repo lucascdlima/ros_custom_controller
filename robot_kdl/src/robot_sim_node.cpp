@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 
   if(internal_control)
   {
-    myrobot.InitControlParam(ros::Time::now());
+    myrobot.InitControlParam();
     ROS_INFO("Simulation using inernal control");
    }
 

@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
       ros::spinOnce();
 
-      period.sleep();
+      loop_period.sleep();
 
     }
   }
