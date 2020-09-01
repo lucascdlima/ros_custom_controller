@@ -18,9 +18,14 @@ using namespace Eigen;
 class RobotKDL{
 
   public:
-    RobotKDL();
-    RobotKDL(const char* urdf_file, ros::NodeHandle &n);
+
+    RobotKDL(const char* urdf_file, ros::NodeHandle &n,ros::Duration loop_period);
     ~RobotKDL();
+
+    bool Init();
+
+    std::string urdf_file_path;
+    ros::NodeHandle nh;
     KDL::Chain robot_chain; //handle for robot chain of join-link segments
     KDL::Tree robot_tree; //handle of robot chains
 
@@ -39,6 +44,8 @@ class RobotKDL{
     KDL::JntArray C_coriolis; //lagrange coriolis vector of manipulator
     KDL::JntArray G_gravity; //lagrange gravity vector of manipulator
 
+    unsigned long int iter_count;
+
     KDL::JntArray UpdateDynamic();
 
     void SetEffortCommand(const VectorXd& jnts_effort);
@@ -51,8 +58,8 @@ class RobotKDL{
     void SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg);
     void SetJointStatesMsg(sensor_msgs::JointState &msg);
 
-    //Methods and attributes bellow used in internal control only
-    void ComputedTorqueControlExample(ros::Time time);
+    //Methods and attributes below used in internal control only
+    void ComputedTorqueControlExample();
     void InitControlParam(ros::Time stime);
 
     KDL::JntArray jnt_u;
@@ -61,6 +68,7 @@ class RobotKDL{
     Eigen::MatrixXd Kd; //Derivative constants of control
 
     double wn; //angular frequency of desired joints trajectory (sinusoid)
+    double dt; //Integration interval based on simulation loop period
 
     Eigen:: VectorXd q_des; //joints desired position
     Eigen:: VectorXd dq_des; //joints desired velocities
