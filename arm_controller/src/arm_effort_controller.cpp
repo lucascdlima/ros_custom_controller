@@ -19,13 +19,11 @@ bool ArmEffortController::init(hardware_interface::EffortJointInterface* hw, ros
   }
   nh_ = n;
 
-  //Get joints names from ros param
+  //Get ros params joints names and urdf model
   if (!nh_.getParam("/arm_effort_controller_obj/joints", joint_names_)){
     ROS_ERROR("Could not find joints names");
     return false;
   }
-
-  //Get path file of robot urdf model to be controlled
   if (!nh_.getParam("/arm_effort_controller_obj/urdf_model", urdf_model_)){
     ROS_ERROR("Could not find robot urdf model path");
     return false;
@@ -51,8 +49,6 @@ bool ArmEffortController::init(hardware_interface::EffortJointInterface* hw, ros
     ROS_ERROR("Failed to get KDL::chain");
     return false;
   }
-
-  std::vector<Segment> robot_segments = robot_chain.segments;
 
   jnts_pos.resize(num_jnts_);
   jnts_vel.resize(num_jnts_);
@@ -98,12 +94,14 @@ void ArmEffortController::starting(const ros::Time& time)
   ROS_INFO_STREAM( "Start time set: " <<start_time.toSec());
 }
 
+/**
+* Overloaded function to update controller and set joints effort commands to be sent to
+* the simulated robot.
+* @param time Current ros time.
+* @param period Time interval between update calls.
+*/
 void ArmEffortController::update(const ros::Time& time, const ros::Duration& period)
 {
-  /*Overloaded function to update controller and set joints effort commands to be sent to
-    our robot.
-  */
-
   for(uint i=0;i<num_jnts_;i++)
   {
     //Gets joints states from joints handles (hardware interface)
@@ -111,6 +109,7 @@ void ArmEffortController::update(const ros::Time& time, const ros::Duration& per
     jnts_vel.data(i) = joints_[i].getVelocity();
 
     //Caculates desired joints positions, velocities and accelarations evolutions based on ros time
+    //TODO: update to receive desired joint positions through ros service
     q_des(i) = sin((time.toSec() - start_time.toSec())*wn);
     dq_des(i) = wn*cos((time.toSec() - start_time.toSec())*wn);
     ddq_des(i) = -wn*wn*sin((time.toSec() - start_time.toSec())*wn);
