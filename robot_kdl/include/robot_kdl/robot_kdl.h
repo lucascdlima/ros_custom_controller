@@ -14,7 +14,12 @@
 #include <ros/ros.h>
 
 using namespace Eigen;
-
+/**
+ * @brief The RobotKDL class
+ * Class to handle a manipulator model based on KDL class and perform calculations such as
+ * Forward and Inverse dynamics, and execute simulation of manipulator movements given an internal or external
+ * controller.
+ */
 class RobotKDL{
 
   public:
@@ -24,6 +29,24 @@ class RobotKDL{
 
     bool Init();
 
+    KDL::JntArray UpdateDynamic();
+
+    void SetEffortCommand(const VectorXd& jnts_effort);
+    void SetJointsVelocity(const VectorXd& jnts_velocity);
+    void SetJointsPosition(const VectorXd& jnts_position);
+
+    KDL::JntArray GetJointsVelocity();
+    KDL::JntArray GetJointsPosition();
+    uint GetNumJoints();
+
+    void SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg);
+    void SetJointStatesMsg(sensor_msgs::JointState &msg);
+
+    //Methods and attributes below used in internal control only
+    void ComputedTorqueControlExample();
+    void InitControlParam();
+
+private:
     std::string urdf_file_path;
     ros::NodeHandle nh;
     KDL::Chain robot_chain; //handle for robot chain of join-link segments
@@ -40,39 +63,27 @@ class RobotKDL{
 
     KDL::ChainDynParam* chain_dynamics; //handle of chain dynamic parameters
 
-    KDL::JntSpaceInertiaMatrix M_inertia; //lagrange inertia matrix of manipulator
-    KDL::JntArray C_coriolis; //lagrange coriolis vector of manipulator
-    KDL::JntArray G_gravity; //lagrange gravity vector of manipulator
+    //Lagrange dynamic parameters
+    KDL::JntSpaceInertiaMatrix M_inertia;
+    KDL::JntArray C_coriolis;
+    KDL::JntArray G_gravity;
 
     unsigned long int iter_count;
 
-    KDL::JntArray UpdateDynamic();
-
-    void SetEffortCommand(const VectorXd& jnts_effort);
-    void SetJointsVelocity(const VectorXd& jnts_velocity);
-    void SetJointsPosition(const VectorXd& jnts_position);
-
-    KDL::JntArray GetJointsVelocity();
-    KDL::JntArray GetJointsPosition();
-
-    void SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg);
-    void SetJointStatesMsg(sensor_msgs::JointState &msg);
-
-    //Methods and attributes below used in internal control only
-    void ComputedTorqueControlExample();
-    void InitControlParam();
-
     KDL::JntArray jnt_u;
 
-    Eigen::MatrixXd Kp; //Proportional constants of control
-    Eigen::MatrixXd Kd; //Derivative constants of control
+    //Internal control parameters
+    //Control constants
+    Eigen::MatrixXd Kp;
+    Eigen::MatrixXd Kd;
 
     double wn; //angular frequency of desired joints trajectory (sinusoid)
     double dt; //Integration interval based on simulation loop period
 
-    Eigen:: VectorXd q_des; //joints desired position
-    Eigen:: VectorXd dq_des; //joints desired velocities
-    Eigen:: VectorXd ddq_des; //joints desired acceleration
+    //Desired joints positions, velocities and accelerations
+    Eigen:: VectorXd q_des;
+    Eigen:: VectorXd dq_des;
+    Eigen:: VectorXd ddq_des;
 
     ros::Time start_time;
 

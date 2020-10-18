@@ -20,10 +20,9 @@ int main(int argc, char **argv)
   if(!nh.param("internal_control", internal_control,false))
     ROS_INFO("Param internal_control not found - set as default");
 
-  //Creates the robot object based in urdf model
+  //Creates the robot object (KDL model) based on urdf model
   RobotKDL myrobot("/home/lucaslima/catkin_test_ws/src/robot_kdl/kuka_urdf/kuka_urdf_test.urdf", nh, loop_period);
 
-  //Tries to initiate all robot model parameters
   if(!myrobot.Init())
   {
     ROS_ERROR("Robot model simulation NOT started correctly");
@@ -40,9 +39,10 @@ int main(int argc, char **argv)
   KDL::JntArray jnt_vel;
   KDL::JntArray jnt_pos;
 
-  jnt_acc.resize(myrobot.num_joints);
-  jnt_vel.resize(myrobot.num_joints);
-  jnt_pos.resize(myrobot.num_joints);
+  uint numJoints = myrobot.GetNumJoints();
+  jnt_acc.resize(numJoints);
+  jnt_vel.resize(numJoints);
+  jnt_pos.resize(numJoints);
 
   KDL::SetToZero(jnt_acc);
   KDL::SetToZero(jnt_vel);
@@ -61,6 +61,7 @@ int main(int argc, char **argv)
 
   ROS_INFO("Node simulation loop started");
 
+  //Loop to perform simulation and integration method
   while (ros::ok())
   {
     start_time = ros::Time::now();
@@ -68,14 +69,13 @@ int main(int argc, char **argv)
     if(internal_control)
       myrobot.ComputedTorqueControlExample();
 
-    //Compute joint accelerations via Forward Dynamics encapsuled in UpdateDynamic() function
     jnt_acc = myrobot.UpdateDynamic();
 
     //Update joints velocities and position (Euler integration)
     jnt_vel.data = jnt_acc.data*dt + myrobot.GetJointsVelocity().data;
     jnt_pos.data = jnt_vel.data*dt + myrobot.GetJointsPosition().data;
 
-    // Set new joints positions and velocities
+    //Update current states
     myrobot.SetJointsPosition(jnt_pos.data);
     myrobot.SetJointsVelocity(jnt_vel.data);
 
