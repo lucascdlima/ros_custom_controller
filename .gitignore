@@ -3,3 +3,10 @@ testmsgpackage/
 my_pr2_controller_torque/
 robot_dart/
 lwr_description/
+arm_controller/include/arm_controller/arm_effort_controller (copy).h
+arm_controller/src/arm_effort_controller (copy).cpp
+robot_kdl/include/robot_kdl/robot_kdl (copy).h
+robot_kdl/rosbag/
+robot_kdl/src/robot_kdl (copy).cpp
+robot_kdl/src/robot_sim_node (copy).cpp
+

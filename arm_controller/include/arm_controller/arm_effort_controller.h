@@ -14,6 +14,11 @@
 
 namespace arm_controller_ns{
 
+/**
+ * @brief The ArmEffortController class.
+ * Class derived from base ros class Controller to implement custom computed torque controller
+ * to control multiple joints manipulators.
+ */
 class ArmEffortController: public controller_interface::Controller<hardware_interface::EffortJointInterface>
 {
 
@@ -23,7 +28,6 @@ private:
   KDL::Tree robot_tree; //handle a group of chains
   std::string urdf_model_; //path to urdf manipulator model file
 
-  double init_pos_;
   ros::NodeHandle nh_;
 
   std::vector<std::string> joint_names_;
@@ -51,9 +55,10 @@ private:
 
   double wn; //angular frequency of desired joints trajectory (sinusoid)
 
-  Eigen:: VectorXd q_des; //joints desired position
-  Eigen:: VectorXd dq_des; //joints desired velocities
-  Eigen:: VectorXd ddq_des; //joints desired acceleration
+  //Joints desired positions, velocities and accelerations
+  Eigen:: VectorXd q_des;
+  Eigen:: VectorXd dq_des;
+  Eigen:: VectorXd ddq_des;
 
   ros::Time start_time;
 

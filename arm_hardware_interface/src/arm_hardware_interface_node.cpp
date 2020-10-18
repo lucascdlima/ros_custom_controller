@@ -1,17 +1,19 @@
 #include <ros/ros.h>
 #include "arm_hardware_interface/arm_hardware_interface.h"
 #include "controller_manager/controller_manager.h"
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "arm_hardware_interface_node");
 
-  ros::AsyncSpinner spinner(1); //Creates and starts a ros thread
+  //Creates and starts a ros thread
+  ros::AsyncSpinner spinner(1);
   spinner.start();
 
   ros::NodeHandle nh;
-  ManipulatorRobot manipulator_robot(nh); //Robot hardware interface object
+  ManipulatorRobot manipulator_robot(nh);
 
-  //Tries to initiate hardware interface correctly, if returns false ends the node
+  //Tries to initiate hardware interface
   if(manipulator_robot.init())
   {
     //Registers the robot hardware interface in the controller manager to make it available to be controlled

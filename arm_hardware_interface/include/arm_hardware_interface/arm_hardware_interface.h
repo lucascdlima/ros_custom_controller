@@ -14,6 +14,11 @@ struct MyJointState{
   std::string name;
 };
 
+/**
+ * @brief The ManipulatorRobot class
+ * Class of a manipulator robot derived from ros base class hardware_interface::RobotHW to implement
+ * methods for reading data (joints states) from and writing data (effort commands) to robot hardware.
+ */
 class ManipulatorRobot : public hardware_interface::RobotHW
 {
 public:
@@ -32,13 +37,14 @@ private:
 
   std::vector<std::string> joint_names_;
   std::vector<int> joint_types_;
+
+  //Shared data between hardware interface and controller (both in controller side)
   std::vector<double> joint_position_;
   std::vector<double> joint_velocity_;
   std::vector<double> joint_effort_;
-  std::vector<double> joint_position_command_;
-  std::vector<double> joint_velocity_command_;
   std::vector<double> joint_effort_command_;
 
+  //Store data received from network connection (ros topic)
   std::vector<MyJointState> joints_states;
 
 };

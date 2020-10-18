@@ -65,12 +65,14 @@ bool RobotKDL::Init()
 
 }
 
+/**
+ * @brief RobotKDL::UpdateDynamic Method to update robot dynamic data.
+ * Gets current joints states and effort commands received from controller and updates lagrange
+ * parameters of manipulator forward dynamics (Inertia matrix, Coriolis and Gravity vectors).
+ * @return Joints accelerations in KDL::JntArray.
+ */
 JntArray RobotKDL::UpdateDynamic()
 {
-  /* Function to update manipulator dynamics and return joints accelerations based on robot forward dynamics.
-     This function is used in simulation of robot dynamics.
-  */
-
   //Gets manipulator dynamic parameters based on joints states
   chain_dynamics->JntToMass(jnts_pos,M_inertia);
   chain_dynamics->JntToCoriolis(jnts_pos,jnts_vel,C_coriolis);
@@ -110,26 +112,36 @@ JntArray RobotKDL::GetJointsPosition()
   return jnts_pos;
 }
 
+uint RobotKDL::GetNumJoints()
+{
+  return num_joints;
+}
+
 RobotKDL::~RobotKDL()
 {
   if(chain_dynamics!=nullptr)
     delete chain_dynamics;
 }
 
+/**
+ * @brief RobotKDL::SubEffortCommand Ros Callback to get effort command messages from controller.
+ * This callback is subscribed to ros topic /arm_effort_command for receiving effort commands from
+ * controller and set internal attribute.
+ * @param msg Array with effort commands for each joint.
+ */
 void RobotKDL::SubEffortCommand(const std_msgs::Float64MultiArrayConstPtr& msg)
 {
-  /* Callback function to subscribe ros topic of commanded joints torques and set internal
-    effort joint command attribute. */
-
   for (unsigned int i=0; i<num_joints; i++)
     jnts_effort_command.data[i] = msg->data[i];
 }
 
+/**
+ * @brief RobotKDL::SetJointStatesMsg Method to set joints states msg with manipulator joints data
+ * updated from internal simulation. Joints states will be published later on in the /arm_joints_states ros topic.
+ * @param msg ros message with joints states.
+ */
 void RobotKDL::SetJointStatesMsg(sensor_msgs::JointState &msg)
 {
-  /* Function to set a JointState msg with manipulator joints data updated
-     by internal simulation */
-
   msg.name.resize(num_joints);
   msg.effort.resize(num_joints);
   msg.position.resize(num_joints);
@@ -146,11 +158,12 @@ void RobotKDL::SetJointStatesMsg(sensor_msgs::JointState &msg)
 
 }
 
+/**
+ * @brief RobotKDL::InitControlParam Method to set internal control params when internal control is
+ * used in simulation.
+ */
 void RobotKDL::InitControlParam()
 {
-  /*Function to initiate parameters used in computation of manipulator dynamics. This function
-    is used only when internal control is performed. */
-
   wn = 2*EIGEN_PI/4;
   jnt_u.resize(num_joints);
   KDL::SetToZero(jnt_u);
@@ -163,19 +176,19 @@ void RobotKDL::InitControlParam()
   q_des.resize(num_joints);
   dq_des.resize(num_joints);
   ddq_des.resize(num_joints);
-
 }
 
+/**
+ * @brief RobotKDL::ComputedTorqueControlExample Method used for testing purposes.
+ * If ros parameter internal_control is set to true the simulation of manipulator dynamics is performed
+ * along with a internal control. Effort commands are then set by this method using computed torque control approach.
+ */
 void RobotKDL::ComputedTorqueControlExample()
 {
-  /* Calculates the computed torque control based on manipulator Forward Dynamics and sets
-     joints effort commands.
-  */
 
   for(uint i=0;i<num_joints;i++)
   {
-    //Caculates desired joints positions, velocities and accelarations evolutions based on ros time
-
+    //Caculates desired joints positions, velocities and accelarations evolutions
     q_des(i) = sin(dt*iter_count*wn);
     dq_des(i) = wn*cos(dt*iter_count*wn);
     ddq_des(i) = -wn*wn*sin(dt*iter_count*wn);
@@ -189,6 +202,5 @@ void RobotKDL::ComputedTorqueControlExample()
   //Calculates computed torque control and sets joints command effort data
   jnt_u.data = Kp*(q_des - jnts_pos.data) + Kd*(dq_des - jnts_vel.data);
   jnts_effort_command.data = M_inertia.data*(ddq_des + jnt_u.data ) + C_coriolis.data + G_gravity.data;
-
 
 }
