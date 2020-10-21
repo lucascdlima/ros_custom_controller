@@ -2,6 +2,7 @@
 Repository of my custom controller created in ROS. By using the `ros_control` package, I implemented a Computed Torque Control approach to control a KUKA lwr arm robot.
 
 ## Example
+![kuka sim rviz](robot_sim_rviz.png)
 
 ## Installation/Build
 
